@@ -30,6 +30,8 @@ class cursor :
             cs = cs
         elif key_str=='..':
             cs = cs._parent
+        elif key_str.startswith('$'):
+            pass
         elif cs._children is not None and key_str in cs._children :
             cs = cs._children[key_str]
         else :
@@ -154,19 +156,41 @@ class cursor :
         stack = [(self, instance)]
         stack_record = list()
         while 0<len(stack) :
-            try :
-                (cs, instance) = stack.pop(0)
-                # to avoid loops
-                if instance in stack_record : continue
-                else : stack_record.append(instance)
-                    
-                for label,value in instance.__class__.__dict__.items() :
-                    cs._populate_instance(stack, label, value, with_structure)
-                for label,value in vars(instance).items() :
-                    cs._populate_instance(stack, label, value, with_structure)
-            except Exception as ex :
-                print(ex)
-                
+            #try :
+            (cs, instance) = stack.pop(0)
+            # to avoid loops
+            if instance in stack_record : continue
+            stack_record.append(instance)
+
+            for label,value in instance.__class__.__dict__.items() :
+                cs._populate_instance(stack, label, value, with_structure)
+            for label,value in vars(instance).items() :
+                cs._populate_instance(stack, label, value, with_structure)
+            # except Exception as ex :
+            #     print(ex)
 
     def instanciate(self, values) :
-        pass
+        # no child no more
+        if self._children is None or values is None : 
+            return (None, None)
+
+        sheet = self._datatype() if self._datatype is not None else object()
+        #print((self._datatype(), sheet))
+        # for label,nc in self._children.items() :
+        #     if label in values :
+        #         val = None
+        #         if nc._datatype in (bool,int,float,str,set,frozenset,tuple,list,dict) :
+        #             val = nc._datatype(values[label])
+        #         else :
+        #             val = nc._instanciate_template(self, values[label])
+        #         if val is not None :
+        #             setattr(sheet, label, val)
+        
+        # for label,val in values.items() :
+        #     if hasattr(sheet, label) : continue
+        #     if type(val) is dict : continue
+        #     setattr(sheet, label, val)
+        
+        
+        return sheet
+

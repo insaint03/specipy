@@ -14,6 +14,3 @@ def parameterized_method(*argv) :
             fn(self,params)
         return class_method_wrapper
     return wrapper
-
-        
-        

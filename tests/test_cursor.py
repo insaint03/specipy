@@ -87,7 +87,37 @@ class test_cursor(unittest.TestCase) :
 
         #self.assertIsNotNone(spec.find('/child/name'))
         #self.assertEqual(spec.find('/child/name'), p.child.name)
-        
+    
+    def test_instanciate(self) :
+        class test_parent :
+            def __init__(self) :
+                self.name = 'parent'
+                self.age = 30
+                self.children = None
+            def add_child(self, child) :
+                if self.children is None :
+                    self.children = list()
+                self.children.append(child)
+        class test_child :
+            def __init__(self) :
+                self._parent = None
+                self.age = 10
+                self.school = 'x'
+                self.major = 'hi'
+        p = test_parent()
+        ch = test_child()
+        p.add_child(ch)
+
+        spec = specipy.spec()
+        spec.populate(p, True)
+
+        spec.pretty_print()
+
+        ps = spec.instanciate({
+            'name': 'parentX',
+            'age': 55,
+        })
+        #self.assertEqual(ps.name, 'parentX')
 
 
 
