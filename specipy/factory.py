@@ -6,3 +6,9 @@ class factory(cursor) :
         super().__init__(self, None, schema)
         self._schema = schema
         self._version = version
+
+    def load(self, data) :
+        pass
+    
+    def dump(self) :
+        pass

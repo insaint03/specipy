@@ -1,5 +1,6 @@
-from . import datatypes
-import sys
+from .datatypes import datatypes
+#from .models import models
+import sys, types
 class cursor :
     def __init__(self, document, parent, key, datatype=None, required=False) :
         self._key = key
@@ -49,12 +50,10 @@ class cursor :
             cs = self.__find_iter(cs, ki, ks, createIfNotExists, datatype, required)
                 
         return cs
-
     
     def find(self, keys='') :
         return self._find(keys)
         
-
     def __str__(self) :
         if self._parent is None : 
             # dummy root
@@ -73,7 +72,6 @@ class cursor :
     @property
     def datatype(self) :
         return self._datatype
-
 
     def pretty_print(self, write_stream=sys.stdout) :
         stack = [(self, 0)]
@@ -117,6 +115,7 @@ class cursor :
         path = ''
         while cs._parent is not None and cs != cs._root :
             path = '/%s'%(cs._key) + path
+            cs = cs._parent
         return path
     
     def is_valid(self) :
@@ -130,6 +129,44 @@ class cursor :
                     raise ValueError('Required %s not fulfilled'%(cs.path()))
                     # TODO: value type error
         return True
+    
+    def _populate_instance(self, stack, label, value, with_structure) :
+        if label.startswith('_') \
+        or type(value) is types.FunctionType :
+            return
+        else :
+            next_cursor = self._find(label, with_structure, type(value))
+            if type(value) in (list, tuple, dict, set, frozenset) :
+                # internal collection
+                pass
+            elif type(value) is property :
+                # 
+                pass
+            elif type(value) in (int, str, float, bool) :
+                # 
+                pass
+            else :
+                stack.append((next_cursor, value))
 
-    def instanciate(self) :
+
+    def populate(self, instance, with_structure=False) :
+        # build current model
+        stack = [(self, instance)]
+        stack_record = list()
+        while 0<len(stack) :
+            try :
+                (cs, instance) = stack.pop(0)
+                # to avoid loops
+                if instance in stack_record : continue
+                else : stack_record.append(instance)
+                    
+                for label,value in instance.__class__.__dict__.items() :
+                    cs._populate_instance(stack, label, value, with_structure)
+                for label,value in vars(instance).items() :
+                    cs._populate_instance(stack, label, value, with_structure)
+            except Exception as ex :
+                print(ex)
+                
+
+    def instanciate(self, values) :
         pass
