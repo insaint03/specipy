@@ -23,7 +23,7 @@ class test_specipy(unittest.TestCase) :
 
     def test_pretty_print(self) :
         spec = specipy.spec()
-        schema_spec = spec.expect('test_schema', str, False)
+        schema_spec = spec.expect('test')
         schema_spec.expect('version', str, True)
         spec.expect('/info/title', str, True)
 
@@ -31,12 +31,27 @@ class test_specipy(unittest.TestCase) :
 
         self.assertTrue(True)
 
-    def test_seriese_expectation(self) :
+    def test_series_expectation(self) :
         spec = specipy.spec()
         schema_spec = spec.expect('schema', str, True)
         spec.expect('/info/title', str, True)
 
         self.assertEqual(spec.find('/schema'), schema_spec)
         self.assertTrue(spec.find('/info').required())
+
+        spec.pretty_print()
+
+    def test_upstream_requirements(self) :
+        spec = specipy.spec()
+        spec.expect('/hello/world/hi', str)
+        spec.expect('/hello/world/hello', str)
+
+        self.assertFalse(spec.find('/hello/world').required(), 'required false')
+
+        spec.expect('/hello/world/bye', str, True)
+        self.assertTrue(spec.find('/hello/world').required(), 'upstream required true')
+
+        spec.pretty_print()
+
 
 

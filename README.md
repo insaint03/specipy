@@ -9,7 +9,7 @@ Data document descriptor;
 # Default create
 openapi_spec = specipy.spec()
 # root entity
-openapi_spec.expect(keys='openapi', datatype=str, required=True)
+openapi_spec.expect(key='openapi', datatype=str, required=True)
 # simpler
 openapi_infospec = openapi_spec.expect('info')
 openapi_infospec.expect('title', str, True)
