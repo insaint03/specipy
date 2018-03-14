@@ -13,7 +13,10 @@ class accept(object) :
         if type(val) is self._datatype :
             return val
         elif type(val) in self._allowance :
-            return self._datatype(val)
+            try :
+                return self._datatype(val)
+            except :
+                raise TypeError
         else :
             raise TypeError
 
@@ -63,7 +66,7 @@ class accept_timestamp(accept) :
 """ basic types """
 primitive = accept(str, _DATA_TYPES_PRIMITIVES)
 string = primitive
-integer = accept(int, (bool,int,float))
+integer = accept(int, _DATA_TYPES_PRIMITIVES)
 number = accept(float, _DATA_TYPES_PRIMITIVES)
 """ pattern string """
 uri = accept_pattern('^(?P<protocol>\w+)://(?P<host>[^/]+)(?P<path>(/[^/#\?]*)*)?(?P<query>\?(&?[^&\?\=#]+=[^&\?#]*)*)?(?P<hashtag>#.+)?$')
