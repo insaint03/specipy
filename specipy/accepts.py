@@ -71,7 +71,7 @@ number = accept(float, _DATA_TYPES_PRIMITIVES)
 """ pattern string """
 uri = accept_pattern('^(?P<protocol>\w+)://(?P<host>[^/]+)(?P<path>(/[^/#\?]*)*)?(?P<query>\?(&?[^&\?\=#]+=[^&\?#]*)*)?(?P<hashtag>#.+)?$')
 version = accept_pattern('^v?(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<subminor>\w+)?)?)?$')
-email = accept_pattern('(?P<uname>[-_\w]+)@(?P<hostname>[-_\.\w]+\.\w+)')
+email = accept_pattern('(?P<uname>[-_\.\+\w]+)@(?P<hostname>[-_\.\w]+\.\w+)')
 """ collections """
 array = accept(list, (tuple, list))
 category = accept(set, (tuple, list, set))
