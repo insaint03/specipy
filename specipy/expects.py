@@ -27,7 +27,6 @@ class expect(object) :
         return self
         
 
-
 # tester
 if __name__ == '__main__' :
     class Author(object) :

@@ -1,5 +1,8 @@
 import re
+import json
 from datetime import date, time, datetime
+
+from .spec import spec
 
 _DATA_TYPES_PRIMITIVES = (bool,int,float,str)
 _DATA_TYPES_COLLECTIONS = (tuple,list,set,dict,object) 
@@ -61,6 +64,32 @@ class accept_timestamp(accept) :
         return v
     def __format(self, v) :
         return v
+
+class accept_instance(accept) :
+    def __init__(self, cls) :
+        super().__init__(cls, (dict, object))
+
+        if type(cls) is not type : raise TypeError('Class')
+
+    # save as json string
+    def encode(self, v) :
+        try :
+            if type(v) is dict :
+                return json.dumps(v)
+            elif isinstance(v, self._datatype) :
+                return json.dumps(spec.dump_values(v))
+        except Exception :
+            pass
+        raise TypeError('JSON ENCODE ERROR')
+
+    # load from json string
+    def decode(self, v) :
+        try :
+            dv = json.loads(v)
+            return spec.populate_values(self._datatype, dv)
+        except Exception :
+            pass
+        raise TypeError('JSON DECODE ERROR')
         
 
 """ basic types """
@@ -76,6 +105,7 @@ email = accept_pattern('(?P<uname>[-_\.\+\w]+)@(?P<hostname>[-_\.\w]+\.\w+)')
 array = accept(list, (tuple, list))
 category = accept(set, (tuple, list, set))
 map = accept(dict, (dict, object))
+
 """ datatime """
 
 

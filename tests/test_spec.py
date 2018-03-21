@@ -44,7 +44,7 @@ sample_model_data = (
     # name exception: validation fail
     ({'family_name': 'Smith', 'email': 'john.smith@email.com', 'phone': 'unknown', 'year_of_birth': 1984}, AttributeError),
     # year of birth mismatch: insertion fail
-    ({'given_name': 'John', 'family_name': 'Smith', 'email': 'john.smith', 'phone': 'unknown', 'year_of_birth': '1Q84'}, TypeError),
+    ({'given_name': 'John', 'family_name': 'Smith', 'email': 'john.smith@email.com', 'phone': 'unknown', 'year_of_birth': '1Q84'}, TypeError),
     # email mismatch: insertion fail
     ({'given_name': 'John', 'family_name': 'Smith', 'email': 'john.smith', 'phone': 'unknown', 'year_of_birth': 1984}, ValueError)
 )
@@ -64,26 +64,40 @@ class test_model(unittest.TestCase) :
         self.assertTrue(model.validate())
 
     def test_model_validation(self) :
-        model = sample_model()        
-
+        model = sample_model()
         for data,err in sample_model_data :
             if err is None :
+                model = sample_model()
                 model.populate(data)
                 self.assertTrue(model.validate())
 
     def test_model_exception(self) :
-        model = sample_model()
         for data,err in sample_model_data :
             if err is None : continue
             with self.assertRaises(err) :
+                model = sample_model()
                 model.populate(data)
                 self.assertFalse(model.validation())
 
-        
-
     def test_model_error(self) :
-        model = sample_model()
         with self.assertRaises(TypeError) :
+            model = sample_model()
             model.year_of_birth = (1,'Q',8,4)
+
+    def test_model_dump(self) :
+        for data,err in sample_model_data :
+            if err is not None : continue
+            model = sample_model()
+            model.populate(data)
+            dv = model.dump()
+
+            print('\n'+str(dv))
+            self.assertIsNotNone(dv)
+            self.assertTrue(0<len(dv))
+            for k,v in dv.items() :
+                self.assertFalse(k.startswith('_'))
+                self.assertEqual(v, getattr(model, k))
+            
+
 
         

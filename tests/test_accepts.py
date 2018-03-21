@@ -1,5 +1,24 @@
 import unittest
+
+import json
 from specipy import accepts
+
+class CLS :
+    a = None
+    _b = None
+    def __init__(self) :
+        self.c = 3
+        self._d = 4
+
+    @expect(accepts.integer)
+    def b(self, v=None) :
+        if v is not None : self._b = v
+        return self._b
+
+    @expect(accepts.primitive)
+    def c(self, v=None) :
+        if v is not None : self._c = v
+        return self._c
 
 class test_accepts(unittest.TestCase) :
     # values
@@ -56,7 +75,7 @@ class test_accepts(unittest.TestCase) :
         for aname,expects in self.TYPES_TO_TEST :
             acc = getattr(accepts, aname)
             self.assertIsNotNone(acc)
-            print('\n')
+            #print('\n')
             for i in range(0, len(self.VALUES_TO_TEST)) :
                 v = self.VALUES_TO_TEST[i]
                 e = expects[i]
@@ -67,5 +86,30 @@ class test_accepts(unittest.TestCase) :
                 else :
                     if e is None : e = v
                     self.assertEqual(acc.encode(v), e)
-                    
+    
+    def test_instances(self) :
+        tup = (1, 2, 3, 4)
+        dt = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        acc = accepts.accept_instance(CLS)
+
+        with self.assertRaises(TypeError) : acc.encode(tup)
+
+        vs = acc.encode(dt)
+        vo = json.loads(vs)
+
+        # encoded str
+        self.assertIsNotNone(vs)
+        self.assertIsNotNone(vo)
+
+        for k,v in dt.items() :
+            self.assertTrue(k in vo)
+            self.assertEqual(v, vo[k])
+
+        # decoded
+        dv = acc.decode(vs)
+
+
+            
+
+        
     
