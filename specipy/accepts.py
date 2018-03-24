@@ -26,7 +26,6 @@ class accept(object) :
     def decode(self, val) :
         return val
 
-
 class accept_pattern(accept) :
     def __init__(self, pattern, replace=None) :
         global _DATA_TYPES_PRIMITIVES
@@ -65,6 +64,57 @@ class accept_timestamp(accept) :
     def __format(self, v) :
         return v
 
+""" basic types """
+primitive = accept(str, _DATA_TYPES_PRIMITIVES)
+string = primitive
+integer = accept(int, _DATA_TYPES_PRIMITIVES)
+number = accept(float, _DATA_TYPES_PRIMITIVES)
+""" pattern string """
+uri = accept_pattern('^(?P<protocol>\w+)://(?P<host>[^/]+)(?P<path>(/[^/#\?]*)*)?(?P<query>\?(&?[^&\?\=#]+=[^&\?#]*)*)?(?P<hashtag>#.+)?$')
+version = accept_pattern('^v?(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<subminor>\w+)?)?)?$')
+email = accept_pattern('(?P<uname>[-_\.\+\w]+)@(?P<hostname>[-_\.\w]+\.\w+)')
+
+
+class accept_lists(accept) :
+    def __init__(self, element_accept=primitive) :
+        super().__init__(list, (list, tuple))
+        self._element_accept = element_accept
+        self._list = list()
+
+    def encode(self, v) :
+        del self._list[:]
+
+        if type(v) in (list, tuple) :
+            for element in v :
+                self._list.append(self._element_accept.encode(element))
+        else :
+            raise TypeError
+        return json.dumps(self._list)
+
+    def decode(self, v) :
+        del self._list[:]
+        for element in json.loads(v) :
+            self._list.append(self._element_accept.decode(element))
+
+        return self._list
+
+class accept_map(accept) :
+    def __init__(self, item_accept=primitive) :
+        super().__init__(dict, (dict, object))
+        self._dict = dict()
+
+    def encode(self, v) :
+        self._dict.clear()
+
+        # TODO
+        pass
+
+        
+
+    def decode(self, v) :
+        return json.loads(v)
+
+
 class accept_instance(accept) :
     def __init__(self, cls) :
         super().__init__(cls, (dict, object))
@@ -78,8 +128,8 @@ class accept_instance(accept) :
                 return json.dumps(v)
             elif isinstance(v, self._datatype) :
                 return json.dumps(spec.dump_values(v))
-        except Exception :
-            pass
+        except Exception as ex :
+            print(ex)
         raise TypeError('JSON ENCODE ERROR')
 
     # load from json string
@@ -87,25 +137,18 @@ class accept_instance(accept) :
         try :
             dv = json.loads(v)
             return spec.populate_values(self._datatype, dv)
-        except Exception :
-            pass
+        except Exception as ex :
+            print(ex)
         raise TypeError('JSON DECODE ERROR')
         
 
-""" basic types """
-primitive = accept(str, _DATA_TYPES_PRIMITIVES)
-string = primitive
-integer = accept(int, _DATA_TYPES_PRIMITIVES)
-number = accept(float, _DATA_TYPES_PRIMITIVES)
-""" pattern string """
-uri = accept_pattern('^(?P<protocol>\w+)://(?P<host>[^/]+)(?P<path>(/[^/#\?]*)*)?(?P<query>\?(&?[^&\?\=#]+=[^&\?#]*)*)?(?P<hashtag>#.+)?$')
-version = accept_pattern('^v?(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<subminor>\w+)?)?)?$')
-email = accept_pattern('(?P<uname>[-_\.\+\w]+)@(?P<hostname>[-_\.\w]+\.\w+)')
-""" collections """
-array = accept(list, (tuple, list))
-category = accept(set, (tuple, list, set))
-map = accept(dict, (dict, object))
 
+
+
+
+""" collections """
+array = accept_lists()
+map = accept_map()
 """ datatime """
 
 

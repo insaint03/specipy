@@ -15,6 +15,8 @@ class spec(object) :
             if k in cls_names :
                 if isinstance(obj.__class__.__dict__[k], expects.expect) :
                     obj.__class__.__dict__[k].__set__(obj, v)
+                elif k in obj.__class__.__dict__ or k in obj.__dict__ :
+                    pass
                 else :
                     raise AttributeError('Can not set (%s, %s)'%(k,v))
             else :
